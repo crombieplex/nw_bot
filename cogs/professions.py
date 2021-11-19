@@ -78,22 +78,26 @@ class ProfessionsCog(commands.Cog, name="Professions"):
             "Um die Top crafter in einem Channel zu posten muss zuerst ein channel mit /set_profession_channel gesetzt werden"]), ephemeral=True)
             return
 
-        await self.update_top_crafters()
         self._safe_data_to_disk()
         await ctx.respond(f"{profession_name} level auf {level} gesetzt", ephemeral=True)
+        await self.update_top_crafters()
 
     async def update_top_crafters(self):
         channel = await self.bot.fetch_channel(self.profession_channel_id)
         await channel.purge()
-        headers = ["Beruf", "Member", "Skill Level"]
-        table = []
-        for profession in self.profession_data.values():
+        for idx, profession in enumerate(self.profession_data.values()):
+            table = []
+            if idx == 0:
+                headers = ["Beruf", "Member", "Skill Level"]
+            else:
+                headers = []
+
             top_crafters = profession.get_top_n_crafters(3)
             for crafter in top_crafters:
                 row = [profession.name, crafter.name, crafter.profession_lvl]
                 table.append(row)
-        msg = tabulate(table, headers, tablefmt="grid")
-        await channel.send(f"Aktuelle Berufeliste:\n```{msg}```")
+            msg = tabulate(table, headers, tablefmt="github")
+            await channel.send(f"```{msg}```")
 
     async def parse_profession(self, profession: str):
         profession_key = config.PROFESSIONS.get(profession)
