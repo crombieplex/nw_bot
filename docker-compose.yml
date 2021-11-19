@@ -1,0 +1,14 @@
+version: "3"
+services:
+  bot:
+    build: .
+    volumes:
+      - ./:/app/
+    user: 1000:1000
+    environment:
+      DISCORD_TOKEN:
+      GUILD_ID:
+      SYSTEM_CHANNEL_ID:
+      DB_PATH:
+      LOG_LEVEL:
+    restart: always
