@@ -2,7 +2,6 @@ from typing import Dict
 from discord import Embed
 from discord.commands import Option, SlashCommandGroup, permissions, user_command, message_command
 from discord.ext import commands
-from nwbot import crafter
 from nwbot.profession import Profession
 from tabulate import tabulate
 import discord
