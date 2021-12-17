@@ -148,6 +148,7 @@ class ProfessionsCog(commands.Cog, name="Professions"):
         await ctx.respond(embed=response, ephemeral=True)
 
     @prof_grp.command(guild_ids=[config.guild_id], description="Lösche Berufsdaten eines Members")
+    @permissions.has_role("Admin")
     async def delete_profession_data(self,
         ctx,
         member: discord.Member
