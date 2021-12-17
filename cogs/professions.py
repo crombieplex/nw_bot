@@ -1,10 +1,10 @@
+from typing import Dict
 from discord import Embed
 from discord.commands import Option, SlashCommandGroup, permissions, user_command, message_command
 from discord.ext import commands
-from nwbot import Crafter
+from nwbot import crafter
 from nwbot.profession import Profession
 from tabulate import tabulate
-from typing import Dict
 import discord
 import nwbot.config as config
 import os
@@ -16,7 +16,7 @@ prof_grp = SlashCommandGroup(name="beruf", description="Befehle bzgl. InGame - B
 class ProfessionsCog(commands.Cog, name="Professions"):
     def __init__(self, bot):
         self.bot = bot
-        self.profession_data = {}
+        self.profession_data: Dict[str, Profession] = {}
         self.profession_channel_id = None
         if os.path.exists(config.db_path):
             self._load_data_from_disk()
@@ -38,6 +38,11 @@ class ProfessionsCog(commands.Cog, name="Professions"):
     def _flush_db(self):
         os.remove(config.db_path)
         self.profession_data = {}
+    
+    def _delete_crafter(self, crafter: discord.Member) -> None:
+        for profession in self.profession_data.values():
+            profession.remove_crafter(crafter)
+        
     
     @prof_grp.command(guild_ids=[config.guild_id], description="Setze den Berufs Channel", default_permission=False)
     @permissions.has_role("Admin")
@@ -142,6 +147,15 @@ class ProfessionsCog(commands.Cog, name="Professions"):
         response.add_field(name="Crafter", value="\n".join([x.name for x in crafters]))
         response.add_field(name="Profession Level", value="\n".join([str(x.profession_lvl) for x in crafters]))
         await ctx.respond(embed=response, ephemeral=True)
+
+    @prof_grp.command(guild_ids=[config.guild_id], description="Lösche Berufsdaten eines Members")
+    async def delete_profession_data(self,
+        ctx,
+        member: discord.Member
+    ):
+        self._delete_crafter(member)
+        await ctx.respond(f"Deleted profession data of {member}", ephemeral=True)
+        await self.update_top_crafters()
 
 
 def setup(bot):

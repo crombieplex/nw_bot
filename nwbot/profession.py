@@ -22,6 +22,9 @@ class Profession:
         new_crafter = Crafter.from_discord_member(crafter)
         new_crafter.profession_lvl = profession_level
         self._all_crafters[crafter.id] = new_crafter
+    
+    def remove_crafter(self, crafter: discord.Member) -> None:
+        self._all_crafters.pop(crafter.id, None)
 
     def get_crafter(self, crafter: discord.Member) -> Crafter:
         if crafter.id not in self._all_crafters:
