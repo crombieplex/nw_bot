@@ -1,9 +1,11 @@
 from discord import Embed
 from discord.commands import Option, SlashCommandGroup, permissions, user_command, message_command
 from discord.ext import commands
+from nwbot.crafter import Crafter
 from nwbot.profession import Profession
 from tabulate import tabulate
 from typing import Dict
+import asyncio
 import discord
 import nwbot.config as config
 import os
@@ -38,9 +40,9 @@ class ProfessionsCog(commands.Cog, name="Professions"):
         os.remove(config.db_path)
         self.profession_data = {}
     
-    def _delete_crafter(self, crafter: discord.Member) -> None:
+    def _delete_crafter(self, crafter_id: int) -> None:
         for profession in self.profession_data.values():
-            profession.remove_crafter(crafter)
+            profession.remove_crafter(crafter_id)
         
     
     @prof_grp.command(guild_ids=[config.guild_id], description="Setze den Berufs Channel", default_permission=False)
@@ -59,8 +61,8 @@ class ProfessionsCog(commands.Cog, name="Professions"):
     async def set_profession(
         self,
         ctx,
-        profession_name: Option(str, "Der Beruf für den das Level gesetzt werden soll", choices=[*config.PROFESSIONS.keys()]),
-        level: Option(int, "Das Level des Berufes", default=0)
+        profession_name: Option(str, "Der Beruf für den das Level gesetzt werden soll", choices=[*config.PROFESSIONS.keys()]), # type: ignore
+        level: Option(int, "Das Level des Berufes", default=0) # type: ignore
     ):
         try:
             profession_key = await self.parse_profession(profession_name)
@@ -72,10 +74,14 @@ class ProfessionsCog(commands.Cog, name="Professions"):
             self.profession_data[profession_key] = Profession(profession_name)
         profession = self.profession_data.get(profession_key)
 
-        try: 
-            profession.update_crafter_level(ctx.author, level) 
+        try:
+            crafter = profession.get_crafter(ctx.author.id)
         except KeyError:
-            profession.add_crafter(ctx.author, level)
+            crafter = profession.add_crafter(ctx.author.id, ctx.author.display_name, level)
+
+        if crafter.name != ctx.author.display_name:
+            profession.update_crafter_name(ctx.author.id, ctx.author.display_name) 
+        profession.update_crafter_level(crafter.id, level)
 
         if not self.profession_channel_id:
             await ctx.respond("\n".join([f"{profession_name} level auf {level} gesetzt",
@@ -83,8 +89,10 @@ class ProfessionsCog(commands.Cog, name="Professions"):
             return
 
         self._safe_data_to_disk()
-        await ctx.respond(f"{profession_name} level auf {level} gesetzt", ephemeral=True)
-        await self.update_top_crafters()
+        asyncio.gather(
+            self.update_top_crafters(),
+            ctx.respond(f"{profession_name} level auf {level} gesetzt", ephemeral=True)
+        )
 
     async def update_top_crafters(self):
         channel = await self.bot.fetch_channel(self.profession_channel_id)
@@ -129,7 +137,7 @@ class ProfessionsCog(commands.Cog, name="Professions"):
     @prof_grp.command(guild_ids=[config.guild_id], description="Rufe die Top5 Mitglieder ab mit genanntem Beruf")
     async def get_profession(self,
         ctx,
-        profession_name: Option(str, "Der Beruf für den die Top5 Crafter abgefragt werden sollen", choices=[*config.PROFESSIONS.keys()]),
+        profession_name: Option(str, "Der Beruf für den die Top5 Crafter abgefragt werden sollen", choices=[*config.PROFESSIONS.keys()]), # type: ignore
     ):
         try:
             profession_key = await self.parse_profession(profession_name)
@@ -149,13 +157,27 @@ class ProfessionsCog(commands.Cog, name="Professions"):
 
     @prof_grp.command(guild_ids=[config.guild_id], description="Lösche Berufsdaten eines Members")
     @permissions.has_role("Admin")
-    async def delete_profession_data(self,
+    async def delete_crafter(self,
         ctx,
         member: discord.Member
     ):
-        self._delete_crafter(member)
-        await ctx.respond(f"Deleted profession data of {member}", ephemeral=True)
-        await self.update_top_crafters()
+        self._delete_crafter(member.id)
+        asyncio.gather(
+            ctx.respond(f"Deleted profession data of {member}", ephemeral=True),
+            self.update_top_crafters()
+        )
+
+    @prof_grp.command(guild_ids=[config.guild_id], description="Lösche Berufsdaten einer ID")
+    @permissions.has_role("Admin")
+    async def delete_crafter_by_id(self,
+        ctx,
+        member_id: str
+    ):
+        self._delete_crafter(int(member_id))
+        asyncio.gather(
+            ctx.respond(f"Deleted profession data of {member_id}", ephemeral=True),
+            self.update_top_crafters()
+        )
 
 
 def setup(bot):

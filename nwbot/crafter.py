@@ -10,5 +10,5 @@ class Crafter:
     profession_lvl: int
 
     @classmethod
-    def from_discord_member(cls, discord_member):
+    def from_discord_member(cls, discord_member: discord.Member):
         return cls(discord_member.id, discord_member.display_name, profession_lvl = 0)
