@@ -19,7 +19,7 @@ class ProfessionsCog(commands.Cog, name="Professions"):
         self.bot = bot
         self.profession_data: Dict[str, Profession] = {}
         self.profession_channel_id = None
-        if os.path.exists(config.db_path):
+        if os.path.exists(config.db_path): # type: ignore
             self._load_data_from_disk()
     
 
@@ -27,19 +27,23 @@ class ProfessionsCog(commands.Cog, name="Professions"):
         data = {}
         data["profession_data"] = self.profession_data
         data["profession_channel_id"] = self.profession_channel_id
-        with open(config.db_path, "wb") as f:
+        with open(config.db_path, "wb") as f: # type: ignore
             pickle.dump(data, f)
 
     def _load_data_from_disk(self):
-        with open(config.db_path, "rb") as f:
+        with open(config.db_path, "rb") as f: # type: ignore
             data = pickle.load(f)
             self.profession_data = data.get("profession_data")
             self.profession_channel_id = data.get("profession_channel_id")
 
     def _flush_db(self):
-        os.remove(config.db_path)
+        os.remove(config.db_path) # type: ignore
         self.profession_data = {}
     
+    def _update_crafter_name(self, crafter_id: int, crafter_name: str) -> None:
+        for profession in self.profession_data.values():
+            profession.update_crafter_name(crafter_id, crafter_name)
+
     def _delete_crafter(self, crafter_id: int) -> None:
         for profession in self.profession_data.values():
             profession.remove_crafter(crafter_id)
@@ -70,9 +74,10 @@ class ProfessionsCog(commands.Cog, name="Professions"):
             await ctx.respond(f"Beruf {profession_name} nicht gefunden")
             return
 
-        if profession_key not in self.profession_data:
-            self.profession_data[profession_key] = Profession(profession_name)
         profession = self.profession_data.get(profession_key)
+        if not profession:
+            profession = Profession(profession_name)
+            self.profession_data[profession_key] = profession
 
         try:
             crafter = profession.get_crafter(ctx.author.id)
@@ -80,7 +85,7 @@ class ProfessionsCog(commands.Cog, name="Professions"):
             crafter = profession.add_crafter(ctx.author.id, ctx.author.display_name, level)
 
         if crafter.name != ctx.author.display_name:
-            profession.update_crafter_name(ctx.author.id, ctx.author.display_name) 
+            self._update_crafter_name(ctx.author.id, ctx.author.display_name) 
         profession.update_crafter_level(crafter.id, level)
 
         if not self.profession_channel_id:

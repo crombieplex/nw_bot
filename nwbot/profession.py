@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+import logging
 from nwbot.crafter import Crafter
 from typing import List, Dict
 
@@ -22,8 +23,8 @@ class Profession:
         self._all_crafters[crafter_id] = new_crafter
         return new_crafter
     
-    def remove_crafter(self, crafter_id: int) -> Crafter:
-        return self._all_crafters.pop(crafter_id, None)
+    def remove_crafter(self, crafter_id: int) -> None:
+        self._all_crafters.pop(crafter_id, None)
 
     def get_crafter(self, crafter_id: int) -> Crafter:
         if crafter_id not in self._all_crafters:
@@ -38,5 +39,6 @@ class Profession:
     def update_crafter_name(self, crafter_id: int, crafter_name: str) -> None:
         if crafter_id not in self._all_crafters:
             raise KeyError("User does not exist")
+        logging.debug(f"Updating crafter name from {self._all_crafters[crafter_id].name} to {crafter_name}")
         self._all_crafters[crafter_id].name = crafter_name
 
