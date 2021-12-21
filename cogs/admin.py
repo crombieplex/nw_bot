@@ -10,8 +10,8 @@ class AdminCog(commands.Cog):
         self.bot = bot
     
     # Guild Slash Command Example with Role Permissions
-    @slash_command(name="clear", guild_ids=[config.guild_id], default_permission=False, description="Clear all messages except the pinned ones from this channel")
-    @permissions.has_role("Admin")
+    @slash_command(name="clear", guild_ids=[config.GUILD_ID], default_permission=False, description="Clear all messages except the pinned ones from this channel")
+    @permissions.has_role(config.ADMIN_ROLE_NAME)
     async def clear_channel(self, ctx):
         channel = ctx.channel
         if channel is not None and not isinstance(channel, DMChannel):

@@ -17,7 +17,7 @@ class ProfessionsCog(commands.Cog, name="Professions"):
         self.bot = bot
         self.profession_data: Dict[str, Profession] = {}
         self.profession_channel_id = None
-        if os.path.exists(config.db_path): # type: ignore
+        if os.path.exists(config.DB_PATH):
             self._load_data_from_disk()
     
 
@@ -25,17 +25,17 @@ class ProfessionsCog(commands.Cog, name="Professions"):
         data = {}
         data["profession_data"] = self.profession_data
         data["profession_channel_id"] = self.profession_channel_id
-        with open(config.db_path, "wb") as f: # type: ignore
+        with open(config.DB_PATH, "wb") as f:
             pickle.dump(data, f)
 
     def _load_data_from_disk(self):
-        with open(config.db_path, "rb") as f: # type: ignore
+        with open(config.DB_PATH, "rb") as f:
             data = pickle.load(f)
             self.profession_data = data.get("profession_data")
             self.profession_channel_id = data.get("profession_channel_id")
 
     def _flush_db(self):
-        os.remove(config.db_path) # type: ignore
+        os.remove(config.DB_PATH)
         self.profession_data = {}
     
     def _update_crafter_name(self, crafter_id: int, crafter_name: str) -> None:
@@ -47,8 +47,8 @@ class ProfessionsCog(commands.Cog, name="Professions"):
             profession.remove_crafter(crafter_id)
         
     
-    @slash_command(guild_ids=[config.guild_id], description="Setze den Berufs Channel", default_permission=False)
-    @permissions.has_role("Admin")
+    @slash_command(guild_ids=[config.GUILD_ID], description="Setze den Berufs Channel", default_permission=False)
+    @permissions.has_role(config.ADMIN_ROLE_NAME)
     async def set_profession_channel(
         self,
         ctx,
@@ -59,7 +59,7 @@ class ProfessionsCog(commands.Cog, name="Professions"):
         await ctx.respond(f"Setze {channel} als Berufe channel", ephemeral=True)
         
 
-    @slash_command(guild_ids=[config.guild_id], description="Setze dein Berufslevel")
+    @slash_command(guild_ids=[config.GUILD_ID], description="Setze dein Berufslevel")
     async def set_profession(
         self,
         ctx,
@@ -120,24 +120,24 @@ class ProfessionsCog(commands.Cog, name="Professions"):
             raise KeyError("Profession does not exist")
         return profession_key
 
-    @user_command(name="Show ID", description="Show User ID", guild_ids=[config.guild_id], default_permission=False)
-    @permissions.has_role("Admin")
+    @user_command(name="Show ID", description="Show User ID", guild_ids=[config.GUILD_ID], default_permission=False)
+    @permissions.has_role(config.ADMIN_ROLE_NAME)
     async def show_id(self, ctx, user: discord.Member):
         await ctx.respond(user.id, ephemeral=True)
 
-    @message_command(name="Repeat", description="Repeat this message", guild_ids=[config.guild_id])
+    @message_command(name="Repeat", description="Repeat this message", guild_ids=[config.GUILD_ID])
     async def repeat(self, ctx, message: discord.Message):
         await ctx.respond(message.content, ephemeral=True)
 
-    @slash_command(guild_ids=[config.guild_id], description="Rufe Alle Berufe ab")
+    @slash_command(guild_ids=[config.GUILD_ID], description="Rufe Alle Berufe ab")
     async def get_profession_names(self, ctx):
         await ctx.respond(config.PROFESSIONS, ephemeral=True)
 
-    @slash_command(guild_ids=[config.guild_id], description="Rufe Alle Berufsdaten ab")
+    @slash_command(guild_ids=[config.GUILD_ID], description="Rufe Alle Berufsdaten ab")
     async def get_profession_data(self, ctx):
         await ctx.respond(self.profession_data, ephemeral=True)
 
-    @slash_command(guild_ids=[config.guild_id], description="Rufe die Top5 Mitglieder ab mit genanntem Beruf")
+    @slash_command(guild_ids=[config.GUILD_ID], description="Rufe die Top5 Mitglieder ab mit genanntem Beruf")
     async def get_profession(self,
         ctx,
         profession_name: Option(str, "Der Beruf für den die Top5 Crafter abgefragt werden sollen", choices=[*config.PROFESSIONS.keys()]), # type: ignore
@@ -158,8 +158,8 @@ class ProfessionsCog(commands.Cog, name="Professions"):
         response.add_field(name="Profession Level", value="\n".join([str(x.profession_lvl) for x in crafters]))
         await ctx.respond(embed=response, ephemeral=True)
 
-    @slash_command(guild_ids=[config.guild_id], description="Lösche Berufsdaten eines Members")
-    @permissions.has_role("Admin")
+    @slash_command(guild_ids=[config.GUILD_ID], description="Lösche Berufsdaten eines Members")
+    @permissions.has_role(config.ADMIN_ROLE_NAME)
     async def delete_crafter(self,
         ctx,
         member: discord.Member
@@ -170,8 +170,8 @@ class ProfessionsCog(commands.Cog, name="Professions"):
             self.update_top_crafters()
         )
 
-    @slash_command(guild_ids=[config.guild_id], description="Lösche Berufsdaten einer ID")
-    @permissions.has_role("Admin")
+    @slash_command(guild_ids=[config.GUILD_ID], description="Lösche Berufsdaten einer ID")
+    @permissions.has_role(config.ADMIN_ROLE_NAME)
     async def delete_crafter_by_id(self,
         ctx,
         member_id: str
