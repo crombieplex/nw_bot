@@ -1,5 +1,5 @@
 from discord import Embed
-from discord.commands import Option, SlashCommandGroup, permissions, user_command, message_command
+from discord.commands import Option, permissions, user_command, message_command, slash_command
 from discord.ext import commands
 from nwbot.crafter import Crafter
 from nwbot.profession import Profession
@@ -11,8 +11,6 @@ import nwbot.config as config
 import os
 import pickle
 
-
-prof_grp = SlashCommandGroup(name="beruf", description="Befehle bzgl. InGame - Berufe", guild_ids=[config.guild_id])
 
 class ProfessionsCog(commands.Cog, name="Professions"):
     def __init__(self, bot):
@@ -49,7 +47,7 @@ class ProfessionsCog(commands.Cog, name="Professions"):
             profession.remove_crafter(crafter_id)
         
     
-    @prof_grp.command(guild_ids=[config.guild_id], description="Setze den Berufs Channel", default_permission=False)
+    @slash_command(guild_ids=[config.guild_id], description="Setze den Berufs Channel", default_permission=False)
     @permissions.has_role("Admin")
     async def set_profession_channel(
         self,
@@ -61,7 +59,7 @@ class ProfessionsCog(commands.Cog, name="Professions"):
         await ctx.respond(f"Setze {channel} als Berufe channel", ephemeral=True)
         
 
-    @prof_grp.command(guild_ids=[config.guild_id], description="Setze dein Berufslevel")
+    @slash_command(guild_ids=[config.guild_id], description="Setze dein Berufslevel")
     async def set_profession(
         self,
         ctx,
@@ -131,15 +129,15 @@ class ProfessionsCog(commands.Cog, name="Professions"):
     async def repeat(self, ctx, message: discord.Message):
         await ctx.respond(message.content, ephemeral=True)
 
-    @prof_grp.command(guild_ids=[config.guild_id], description="Rufe Alle Berufe ab")
+    @slash_command(guild_ids=[config.guild_id], description="Rufe Alle Berufe ab")
     async def get_profession_names(self, ctx):
         await ctx.respond(config.PROFESSIONS, ephemeral=True)
 
-    @prof_grp.command(guild_ids=[config.guild_id], description="Rufe Alle Berufsdaten ab")
+    @slash_command(guild_ids=[config.guild_id], description="Rufe Alle Berufsdaten ab")
     async def get_profession_data(self, ctx):
         await ctx.respond(self.profession_data, ephemeral=True)
 
-    @prof_grp.command(guild_ids=[config.guild_id], description="Rufe die Top5 Mitglieder ab mit genanntem Beruf")
+    @slash_command(guild_ids=[config.guild_id], description="Rufe die Top5 Mitglieder ab mit genanntem Beruf")
     async def get_profession(self,
         ctx,
         profession_name: Option(str, "Der Beruf für den die Top5 Crafter abgefragt werden sollen", choices=[*config.PROFESSIONS.keys()]), # type: ignore
@@ -160,7 +158,7 @@ class ProfessionsCog(commands.Cog, name="Professions"):
         response.add_field(name="Profession Level", value="\n".join([str(x.profession_lvl) for x in crafters]))
         await ctx.respond(embed=response, ephemeral=True)
 
-    @prof_grp.command(guild_ids=[config.guild_id], description="Lösche Berufsdaten eines Members")
+    @slash_command(guild_ids=[config.guild_id], description="Lösche Berufsdaten eines Members")
     @permissions.has_role("Admin")
     async def delete_crafter(self,
         ctx,
@@ -172,7 +170,7 @@ class ProfessionsCog(commands.Cog, name="Professions"):
             self.update_top_crafters()
         )
 
-    @prof_grp.command(guild_ids=[config.guild_id], description="Lösche Berufsdaten einer ID")
+    @slash_command(guild_ids=[config.guild_id], description="Lösche Berufsdaten einer ID")
     @permissions.has_role("Admin")
     async def delete_crafter_by_id(self,
         ctx,
