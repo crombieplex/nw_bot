@@ -6,7 +6,7 @@ services:
       - ./:/app/
     user: 1000:1000
     environment:
-      DISCORD_TOKEN:
+      DISCORD_TOKEN: "OTU0OTE2MjM0OTU1MjE0ODc5.YjaFCw.sqDYc84H9mSFWeMXVni481rjlHA"
       GUILD_ID:
       SYSTEM_CHANNEL_ID:
       DB_PATH:

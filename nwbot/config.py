@@ -17,16 +17,16 @@ log_level_mapping = {'DEBUG': logging.DEBUG,
 LOG_LEVEL = log_level_mapping.get(log_level_config)
 
 PROFESSIONS = {
-    "Waffenschmiedekunst": "WFK",
-    "Rüstungsschmiedekunst": "RSK",
-    "Ingenieurskunst": "ING",
-    "Juwelenschleiferei": "JUW",
-    "Arkana": "ARK",
-    "Kochkunst": "KOK",
-    "Tischlerei": "TSL",
-    "Schmelzen": "SMZ",
-    "Holzverarbeitung": "HLZ",
-    "Lederverarbeitung": "LDR",
-    "Weberei": "WBR",
-    "Steinmetzkunst": "SMK"
+    "Weaponsmithing": "WS",
+    "Armorsmithing": "AS",
+    "Engineering": "ING",
+    "JewelCrafting": "JC",
+    "Arcana": "ARK",
+    "Cooking": "KOK",
+    "Furnishing": "FUR",
+    "Smelting": "SML",
+    "Woodworking": "WW",
+    "Leatherworking": "LW",
+    "Weaving": "WV",
+    "Stonecutting": "SC"
 }
